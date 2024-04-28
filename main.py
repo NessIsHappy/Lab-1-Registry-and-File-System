@@ -1,5 +1,6 @@
 import os
 import shutil
+import argparse
 
 
 def create_file(file_name: str) -> None:
@@ -44,12 +45,26 @@ def rename_file(file_name: str, new_name: str) -> None:
 
 
 def main():
-    create_file('file.txt')
-    append_file('file.txt')
-    read_file('file.txt')
-    copy_file('file.txt', 'Z:\\Desktop\\ЦК')
-    rename_file('file.txt', 'file_diff.txt')
-    delete_file('file_diff.txt')
+
+    parser = argparse.ArgumentParser()
+
+    subparsers = parser.add_subparsers()
+
+    filesys_parser = subparsers.add_parser('filesys')
+    filesys_parser.add_argument('-cr', '--create', type=str, nargs=1, help='create a new file')
+    filesys_parser.add_argument('-a', '--append', type=str, nargs=1, help='append to a file')
+    filesys_parser.add_argument('-rd', '--read', type=str, nargs=1, help='read from a file')
+    filesys_parser.add_argument('-cp', '--copy', type=str, nargs=2, help='copy file to a directory')
+    filesys_parser.add_argument('-rn', '--rename', type=str, nargs=2, help='rename file')
+    filesys_parser.add_argument('-d', '--delete', type=str, nargs=1, help='delete a file')
+
+    registry_parser = subparsers.add_parser('registry')
+    registry_parser.add_argument('-cr', '--create', nargs=1, help='create a new key')
+    registry_parser.add_argument('-d', '--delete', nargs=1, help='delete a key')
+    registry_parser.add_argument('-w', '--write', nargs=1, help='write to a key')
+
+    args = parser.parse_args()
+    print(args)
 
 
 if __name__ == "__main__":
