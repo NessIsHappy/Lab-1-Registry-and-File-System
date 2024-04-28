@@ -1,6 +1,7 @@
 import os
 import shutil
 import argparse
+import winreg
 
 
 def create_file(file_name: str) -> None:
@@ -44,6 +45,30 @@ def rename_file(file_name: str, new_name: str) -> None:
         print("File exists!")
 
 
+def create_key(key_name: str) -> None:
+    try:
+        key = winreg.CreateKey(winreg.HKEY_CURRENT_USER, key_name)
+        winreg.CloseKey(key)
+    except Exception:
+        print("Can't create a key!")
+
+
+def delete_key(key_name: str) -> None:
+    try:
+        winreg.DeleteKey(winreg.HKEY_CURRENT_USER, key_name)
+    except Exception:
+        print("Can't delete a key!")
+
+
+def write_key(key_name: str, value_name: str, value_data) -> None:
+    try:
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_name, 0, winreg.KEY_WRITE)
+        winreg.SetValueEx(key, value_name, 0, winreg.REG_SZ, value_data)
+        winreg.CloseKey(key)
+    except Exception:
+        print("Can't append to key!")
+
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -61,7 +86,7 @@ def main():
     registry_parser = subparsers.add_parser('registry')
     registry_parser.add_argument('-cr', '--create', nargs=1, metavar='KEYNAME', help='create a new key')
     registry_parser.add_argument('-d', '--delete', nargs=1, metavar='KEYNAME', help='delete a key')
-    registry_parser.add_argument('-w', '--write', nargs=1, metavar='KEYNAME', help='write to a key')
+    registry_parser.add_argument('-w', '--write', nargs=3, metavar='KEYNAME', help='write to a key')
 
     args = parser.parse_args()
     args_dict = vars(args)
@@ -82,7 +107,14 @@ def main():
                 elif command == 'delete':
                     delete_file(args_dict[command][0])
     elif len(vars(args)) == 3:
-        return
+        for command in args_dict:
+            if args_dict[command] is not None:
+                if command == 'create':
+                    create_key(args_dict[command][0])
+                elif command == 'delete':
+                    delete_key(args_dict[command][0])
+                elif command == 'write':
+                    write_key(args_dict[command][0], args_dict[command][1], args_dict[command][2])
 
 
 if __name__ == "__main__":
