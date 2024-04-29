@@ -25,12 +25,14 @@ def append_file(file_name: str) -> None:
         file.write(text)
 
 
-def read_file(file_name: str) -> None:
+def read_file(file_name: str) -> str:
     try:
         with open(file_name, "r") as file:
             print(file.read())
+            return file.read()
     except FileNotFoundError:
         print("No such file!")
+        return ''
 
 
 def copy_file(file_name: str, new_directory: str) -> None:
@@ -69,6 +71,19 @@ def write_key(key_name: str, value_name: str, value_data) -> None:
         print("Can't append to key!")
 
 
+def search_string_file(target_dir, search_string):
+    for root, dirs, files in os.walk(target_dir):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                with open(file_path, 'r') as f:
+                    for line_number, line in enumerate(f, 1):
+                        if search_string in line:
+                            print(f'Found in file: {file_path}, line: {line_number}, content: {line.strip()}')
+            except (IOError, OSError):
+                print(f'Error reading file: {file_path}')
+
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -82,6 +97,7 @@ def main():
     filesys_parser.add_argument('-cp', '--copy', type=str, nargs=2, metavar=('OLD_NAME', 'NEW_NAME'), help='copy file to a directory')
     filesys_parser.add_argument('-rn', '--rename', type=str, nargs=2, metavar=('FILENAME', 'DIRECTORY'), help='rename file')
     filesys_parser.add_argument('-d', '--delete', type=str, nargs=1, metavar='FILENAME', help='delete a file')
+    filesys_parser.add_argument('-f', '--find_str', type=str, nargs=2, metavar=('DIRNAME', 'STRING'), help='find a string')
 
     registry_parser = subparsers.add_parser('registry')
     registry_parser.add_argument('-cr', '--create', nargs=1, metavar='KEYNAME', help='create a new key')
@@ -91,7 +107,7 @@ def main():
     args = parser.parse_args()
     args_dict = vars(args)
 
-    if len(vars(args)) == 6:
+    if len(vars(args)) == 7:
         for command in args_dict:
             if args_dict[command] is not None:
                 if command == 'create':
@@ -106,6 +122,8 @@ def main():
                     rename_file(args_dict[command][0], args_dict[command][1])
                 elif command == 'delete':
                     delete_file(args_dict[command][0])
+                elif command == 'find_str':
+                    search_string_file(args_dict[command][0], args_dict[command][1])
     elif len(vars(args)) == 3:
         for command in args_dict:
             if args_dict[command] is not None:
