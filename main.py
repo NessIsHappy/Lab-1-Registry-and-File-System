@@ -85,13 +85,13 @@ def find_file(target_dir: str, search_string: str) -> None:
 
 
 def find_key(root_key: str, target_value: str) -> None:
-    def search_recursively(key: any) -> None:
+    def find_subkey(key: any) -> None:
         try:
             i = 0
             while True:
                 subkey_name = winreg.EnumKey(key, i)
                 subkey = winreg.OpenKey(key, subkey_name)
-                search_recursively(subkey)
+                find_subkey(subkey)
                 i += 1
         except WindowsError:
             pass
@@ -117,7 +117,7 @@ def find_key(root_key: str, target_value: str) -> None:
     if root_key in root_key_map:
         hkey = root_key_map[root_key]
         with winreg.ConnectRegistry(None, hkey) as reg:
-            search_recursively(reg)
+            find_subkey(reg)
 
 
 def main():
